@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Лягушонок Квак</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Layout: сверху пруд с числовой прямой и лягушкой, под ним вопрос и большие кнопки. Светлая детская тема. */
+:root{--sky:#c9f0ff;--water:#5cc4e8;--water2:#2b9fcf;--pad:#4cbf5a;--pad2:#2f9a3f;--ink:#163040;--muted:#4f6b7a;--sun:#ffd23f;--pink:#ff6fa1;--ok:#22a85a;--bad:#e5484d;--card:#ffffff;
+--f:"Nunito",system-ui,-apple-system,sans-serif;color-scheme:light}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:linear-gradient(#c9f0ff,#eafaff 40%,#fff);color:var(--ink);font:18px/1.35 var(--f);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+.wrap{max-width:900px;margin:0 auto;padding-block:12px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font:900 28px var(--f);display:flex;align-items:center;gap:8px}
+.hud{display:flex;gap:8px;align-items:center}
+.pill{background:#fff;border-radius:999px;padding:6px 14px;font:900 20px var(--f);box-shadow:0 3px 0 #b6dde9}
+.pill.bump{animation:bump .4s}@keyframes bump{40%{transform:scale(1.2)}}
+.ib{font:900 18px var(--f);background:#fff;border:0;border-radius:14px;min-width:46px;min-height:46px;box-shadow:0 3px 0 #b6dde9;cursor:pointer}
+.levels{display:flex;gap:8px;flex-wrap:wrap}
+.lv{font:800 15px var(--f);border:0;border-radius:999px;padding:0 16px;min-height:42px;background:#fff;color:var(--muted);box-shadow:0 3px 0 #b6dde9;cursor:pointer}
+.lv[aria-current="true"]{background:var(--pad);color:#fff;box-shadow:0 3px 0 var(--pad2)}
+.pond{position:relative;background:linear-gradient(var(--water),var(--water2));border-radius:24px;overflow:hidden;box-shadow:0 8px 0 #1f7ea8}
+.pond svg{display:block;width:100%;height:auto}
+.ripple{animation:rip 3s ease-in-out infinite}@keyframes rip{50%{transform:translateX(-12px)}}
+.card{background:var(--card);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 0 #d4ecf3}
+.prog{display:flex;gap:6px}.prog i{flex:1;height:10px;border-radius:9px;background:#e3f3f8}.prog i.on{background:var(--pad)}.prog i.cur{background:#a8e6b2}
+.task{font:900 clamp(38px,8vw,56px)/1 var(--f);text-align:center;letter-spacing:.02em}
+.task .q{color:var(--pink)}
+.ask{font:800 22px var(--f);text-align:center;margin:0}
+.ask b{color:var(--water2)}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.key{font:900 30px var(--f);min-height:64px;border:0;border-radius:18px;background:linear-gradient(#fff,#e9f8ff);box-shadow:0 5px 0 #a9d6e6;color:var(--ink);cursor:pointer}
+.key:active{transform:translateY(4px);box-shadow:0 1px 0 #a9d6e6}
+.key.lily{background:radial-gradient(circle at 50% 40%,#7ee08a,#3fae4c);color:#fff;box-shadow:0 5px 0 var(--pad2);border-radius:50%;aspect-ratio:1;min-height:auto;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.key.wrong{background:#ffd6d8;box-shadow:0 5px 0 #e9a3a6;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:420px;margin:0 auto;width:100%}
+.msg{min-height:30px;text-align:center;font:900 22px var(--f)}.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+.hint{background:#fff7d6;border-radius:16px;padding:10px 14px;font-weight:800;text-align:center}
+.overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:16px;background:rgba(20,60,80,.45)}
+.modal{width:min(440px,100%);background:#fff;border-radius:28px;padding:24px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;animation:pop .4s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+.modal h2{margin:0;font:900 30px var(--f)}.modal p{margin:0;color:var(--muted);font-weight:700}
+.big{font-size:70px;line-height:1}
+.btn{font:900 20px var(--f);border:0;border-radius:18px;min-height:56px;padding:0 26px;background:var(--pad);color:#fff;box-shadow:0 5px 0 var(--pad2);cursor:pointer}
+.btn.sec{background:#fff;color:var(--ink);box-shadow:0 5px 0 #b6dde9}
+.flies{font-size:34px;letter-spacing:4px}
+details{background:#fff;border-radius:18px;padding:10px 14px}summary{cursor:pointer;font-weight:800;color:var(--muted)}
+.rep{font-size:15px;color:var(--muted);margin:6px 0 0}
+:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+@media (max-width:520px){.pad{grid-template-columns:repeat(5,1fr);gap:6px}.key{font-size:24px;min-height:54px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <header>
+    <div class="logo"><span aria-hidden="true">🐸</span>Лягушонок Квак</div>
+    <div class="hud"><button class="ib" id="mute" type="button" aria-label="Выключить звук">🔊</button><div class="pill" id="fliesP" aria-live="polite">🪰 <span id="flies">0</span></div></div>
+  </header>
+  <nav class="levels" id="levels" aria-label="Уровни"></nav>
+  <div class="pond"><svg viewBox="0 0 900 260" id="pond" aria-hidden="true"></svg></div>
+  <section class="card" id="card" aria-live="polite">
+    <div class="prog" id="prog"></div>
+    <div class="task" id="task"></div>
+    <p class="ask" id="ask"></p>
+    <div id="input"></div>
+    <div class="msg" id="msg"></div>
+    <div class="hint" id="hint" hidden></div>
+  </section>
+  <details><summary>Для учителя</summary><div id="report"></div></details>
+</div>
+<div class="overlay" id="start"><div class="modal">
+  <div class="big">🐸</div><h2>Лягушонок Квак</h2>
+  <p>Помоги Кваку допрыгать по кувшинкам! Сначала прыгаем до круглого числа, потом дальше. За каждый пример — муха 🪰</p>
+  <button class="btn" id="play" type="button">Прыгать!</button>
+</div></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const NS='http://www.w3.org/2000/svg';
+const LEVELS=[{name:'Прибавляем',op:'+',n:8},{name:'Отнимаем',op:'−',n:8},{name:'Вперемешку',op:'?',n:10}];
+let lv=0,ti=0,task=null,step=0,flies=0,muted=false,busy=false,frogX=0,log=[[],[],[]],cur=null,wrongs=0;
+
+// задача: переход через десяток
+function make(op){if(op==='?')op=Math.random()<.5?'+':'−';
+  if(op==='+'){const a=R(1,8)*10+R(5,9),b=R(10-a%10+1,9);const to=a-a%10+10;return {op,a,b,round:to,s1:to-a,s2:b-(to-a),ans:a+b}}
+  const a=R(2,9)*10+R(1,5),b=R(a%10+1,9);const to=a-a%10;return {op,a,b,round:to,s1:a-to,s2:b-(a-to),ans:a-b}}
+
+// пруд: числовая прямая
+function drawPond(){const s=$('pond');const lo=task.op==='+'?task.a-2:task.ans-2,hi=lo+(task.op==='+'?task.b+4:task.b+4);
+  const X=v=>60+(v-lo)/(hi-lo)*780;s.innerHTML='';
+  s.insertAdjacentHTML('beforeend',`<g class="ripple" fill="#7fd6f0" opacity=".5"><ellipse cx="150" cy="40" rx="70" ry="8"/><ellipse cx="600" cy="30" rx="90" ry="9"/><ellipse cx="380" cy="235" rx="120" ry="10"/></g>`);
+  for(let v=lo;v<=hi;v++){const x=X(v),round=v%10===0;s.insertAdjacentHTML('beforeend',`<g><ellipse cx="${x}" cy="175" rx="${round?34:24}" ry="${round?15:11}" fill="${round?'#ffd23f':'#4cbf5a'}" stroke="${round?'#c99a00':'#2f9a3f'}" stroke-width="3"/><text x="${x}" y="215" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="${round?26:20}" fill="#fff" stroke="#14506a" stroke-width="4" paint-order="stroke">${v}</text></g>`)}
+  s.insertAdjacentHTML('beforeend','<g id="arcs"></g><g id="frog"><text x="0" y="0" font-size="56" text-anchor="middle">🐸</text></g>');
+  pond.X=X;frogX=task.a;placeFrog(task.a,false)}
+const pond={X:v=>v};
+function placeFrog(v,anim,done){const f=$('frog');const x1=pond.X(v),y=160;
+  if(!anim||!f.animate){f.setAttribute('transform',`translate(${x1},${y})`);frogX=v;done&&done();return}
+  const x0=pond.X(frogX);const frames=[];for(let i=0;i<=12;i++){const t=i/12;frames.push({transform:`translate(${x0+(x1-x0)*t}px,${y-Math.sin(Math.PI*t)*90}px)`})}
+  arc(x0,x1);f.setAttribute('transform','');const a=f.animate(frames,{duration:650,easing:'ease-in-out'});boing();
+  a.onfinish=()=>{f.setAttribute('transform',`translate(${x1},${y})`);frogX=v;splash(x1);done&&done()}}
+function arc(x0,x1){const g=$('arcs');const p=document.createElementNS(NS,'path');p.setAttribute('d',`M${x0} 150 Q${(x0+x1)/2} ${60} ${x1} 150`);p.setAttribute('fill','none');p.setAttribute('stroke','#fff');p.setAttribute('stroke-width','4');p.setAttribute('stroke-dasharray','8 8');g.append(p);
+  const t=document.createElementNS(NS,'text');t.setAttribute('x',(x0+x1)/2);t.setAttribute('y',90);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','26');t.setAttribute('font-weight','900');t.setAttribute('font-family','Nunito');t.setAttribute('fill','#fff');t.setAttribute('stroke','#14506a');t.setAttribute('stroke-width','4');t.setAttribute('paint-order','stroke');t.textContent=(task.op==='+'?'+':'−')+Math.round(Math.abs(x1-x0)/(pond.X(1)-pond.X(0)));g.append(t)}
+
+// звук
+let ac=null;function audio(){try{if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume()}catch(e){}}
+addEventListener('pointerdown',audio);
+function tone(f,d,v=.18,delay=0,type='triangle'){if(!ac||muted)return;const t=ac.currentTime+delay;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d)}
+function boing(){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(250,ac.currentTime);o.frequency.exponentialRampToValueAtTime(700,ac.currentTime+.25);g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.3);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}
+const sOk=()=>{tone(660,.12);tone(880,.2,.18,.1)},sBad=()=>tone(200,.25,.12,0,'sawtooth'),sWin=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.3,.16,i*.12));
+
+// частицы
+const fx=$('fx'),ctx=fx.getContext('2d');let parts=[],on=false;
+function size(){fx.width=innerWidth*devicePixelRatio;fx.height=innerHeight*devicePixelRatio}
+function burst(x,y,n,C){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=2+Math.random()*6;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-3,l:1,r:4+Math.random()*5,c:C[i%C.length]})}if(!on)loop()}
+function loop(){on=true;const d=devicePixelRatio;ctx.clearRect(0,0,fx.width,fx.height);parts=parts.filter(p=>p.l>0);parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.2;p.l-=.02;ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x*d,p.y*d,p.r*d,0,7);ctx.fill()});ctx.globalAlpha=1;if(parts.length)requestAnimationFrame(loop);else on=false}
+function splash(x){const r=$('pond').getBoundingClientRect();burst(r.left+x/900*r.width,r.top+175/260*r.height,14,['#ffffff','#bdeeff','#7fd6f0'])}
+
+// игра
+function newTask(){task=make(LEVELS[lv].op);step=1;wrongs=0;cur={t:task.a+' '+task.op+' '+task.b,ans:task.ans,first:true};drawPond();draw()}
+function draw(){const p=$('prog');p.replaceChildren();for(let i=0;i<LEVELS[lv].n;i++)p.append(el('i',i<ti?'on':i===ti?'cur':''));
+  const t=$('task');t.replaceChildren(document.createTextNode(task.a+' '+task.op+' '+task.b+' = '),el('span','q',step===4?String(task.ans):'?'));
+  $('hint').hidden=true;const ask=$('ask'),inp=$('input');inp.replaceChildren();
+  if(step===1){ask.innerHTML=task.op==='+'?`Сколько прыгнуть до <b>${task.round}</b>?`:`Сколько прыгнуть назад до <b>${task.round}</b>?`;inp.append(numPad(task.s1))}
+  else if(step===2){ask.innerHTML=`Нужно всего <b>${task.b}</b>. Сколько ещё прыгнуть?`;inp.append(numPad(task.s2))}
+  else if(step===3){ask.innerHTML=`На какой кувшинке Квак?`;const c=el('div','choices');const opts=[task.ans,task.ans+(task.op==='+'?-10:10),task.ans+(Math.random()<.5?1:-1)].sort(()=>Math.random()-.5);opts.forEach(v=>{const b=el('button','key lily',String(v));b.type='button';b.onclick=()=>answer(v,task.ans,b);c.append(b)});inp.append(c)}}
+function numPad(right){const g=el('div','pad');for(let v=1;v<=10;v++){const b=el('button','key',String(v));b.type='button';b.onclick=()=>answer(v,right,b);g.append(b)}return g}
+function answer(v,right,b){if(busy)return;const m=$('msg');
+  if(v===right){busy=true;sOk();m.className='msg ok';
+    if(step===1){m.textContent='Прыг! Мы на '+task.round+'!';placeFrog(task.round,true,()=>{busy=false;step=2;m.textContent='';draw()})}
+    else if(step===2){m.textContent='Ещё прыжок!';placeFrog(task.ans,true,()=>{busy=false;step=3;m.textContent='';draw()})}
+    else{step=4;m.textContent=['Ура!','Квак-квак, правильно!','Молодец!','Супер!'][R(0,3)];flies++;$('flies').textContent=flies;const pl=$('fliesP');pl.classList.remove('bump');void pl.offsetWidth;pl.classList.add('bump');draw();
+      const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top,30,['#ffd23f','#ff6fa1','#4cbf5a','#5cc4e8']);
+      setTimeout(()=>{busy=false;m.textContent='';log[lv].push(cur);report();ti++;if(ti>=LEVELS[lv].n)done();else newTask()},1100)}}
+  else{cur.first=false;wrongs++;sBad();b.classList.remove('wrong');void b.offsetWidth;b.classList.add('wrong');m.className='msg bad';m.textContent='Попробуй ещё!';
+    if(wrongs>=2){const h=$('hint');h.hidden=false;h.textContent=step===1?(task.op==='+'?`От ${task.a} до ${task.round} — посчитай по кувшинкам: ${task.a+1}, ${task.a+2}…`:`От ${task.a} назад до ${task.round}: ${task.a-1}, ${task.a-2}…`):step===2?`${task.b} — это ${task.s1} и ещё сколько?`:`Квак сидит там, куда прыгнул последний раз.`}}}
+function done(){sWin();for(let i=0;i<5;i++)setTimeout(()=>burst(innerWidth*(.2+Math.random()*.6),innerHeight*.3,30,['#ffd23f','#ff6fa1','#4cbf5a','#5cc4e8']),i*150);
+  const ov=el('div','overlay');const m=el('div','modal');const first=log[lv].filter(x=>x.first).length;
+  m.append(el('div','big','🏆'),el('h2',null,'Уровень пройден!'),el('div','flies','🪰'.repeat(Math.min(10,first))),el('p',null,'С первого раза: '+first+' из '+log[lv].length));
+  const b=el('button','btn',lv<2?'Дальше: '+LEVELS[lv+1].name:'Сыграть ещё');b.type='button';b.onclick=()=>{ov.remove();go(lv<2?lv+1:lv)};m.append(b);
+  const b2=el('button','btn sec','Ещё раз');b2.type='button';b2.onclick=()=>{ov.remove();go(lv)};if(lv<2)m.append(b2);ov.append(m);document.body.append(ov)}
+function go(n){lv=n;ti=0;log[lv]=[];drawLevels();newTask()}
+function drawLevels(){const nav=$('levels');nav.replaceChildren();LEVELS.forEach((L,i)=>{const b=el('button','lv',L.name);b.type='button';b.setAttribute('aria-current',String(i===lv));b.onclick=()=>go(i);nav.append(b)})}
+function report(){const all=log.flat();const box=$('report');box.replaceChildren();const plus=all.filter(x=>x.t.includes('+')),minus=all.filter(x=>x.t.includes('−'));
+  const f=a=>a.length?a.filter(x=>x.first).length+' из '+a.length+' с первого раза':'—';box.append(el('p','rep','Сложение: '+f(plus)),el('p','rep','Вычитание: '+f(minus)));
+  const miss=all.filter(x=>!x.first).map(x=>x.t+' = '+x.ans);if(miss.length)box.append(el('p','rep','Ошибалась: '+miss.join('; ')))}
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';$('mute').setAttribute('aria-label',muted?'Включить звук':'Выключить звук')};
+addEventListener('resize',size);size();drawLevels();task=make('+');drawPond();
+$('play').onclick=()=>{audio();$('start').remove();go(0)};
+})();
+</script>
+</body>
+</html>
